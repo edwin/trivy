@@ -79,11 +79,50 @@
           };
         });
       };
+	  
+	  window.addEventListener('DOMContentLoaded', () => {	  
+			const severityOrder = {
+			  "CRITICAL": 1,
+			  "HIGH": 2,
+			  "MEDIUM": 3,
+			  "LOW": 4
+			};
+
+			const table = document.getElementById("myTable");
+			const tbody = table.tBodies[0];
+			const rows = Array.from(tbody.rows);
+			
+			const columnIndex = 2; 
+			
+			rows.sort((a, b) => {
+				  const cellA = a.cells[columnIndex];
+				  const cellB = b.cells[columnIndex];
+
+				  if (!cellA || !cellB) {					
+					return 0; // Skip sort if data is malformed
+				  }
+				  
+				  if (cellA.textContent.trim().toUpperCase()=='SEVERITY' || cellB.textContent.trim().toUpperCase()=='SEVERITY') {		
+					return 0; // Skip sort if data is malformed
+				  }
+
+				  const sevA = cellA.textContent.trim().toUpperCase();
+				  const sevB = cellB.textContent.trim().toUpperCase();
+
+				  const orderA = severityOrder[sevA] ?? 999;
+				  const orderB = severityOrder[sevB] ?? 999;
+
+				  return orderA - orderB;
+			});
+
+			rows.forEach(row => tbody.appendChild(row));
+	  });
+	
     </script>
   </head>
   <body>
     <h1>{{- escapeXML ( index . 0 ).Target }} - Trivy Report - {{ now }}</h1>
-    <table>
+    <table id="myTable">
     {{- range . }}
       <tr class="group-header"><th colspan="6">{{ .Type | toString | escapeXML }}</th></tr>
       {{- if (eq (len .Vulnerabilities) 0) }}
